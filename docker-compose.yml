@@ -1,0 +1,41 @@
+services:
+  galaxy-swarm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: galaxy-swarm:latest
+    # No fixed container_name: Coolify redeploys by recreating the service,
+    # and a hardcoded name causes "name already in use" collisions on
+    # redeploy/blue-green rollout. Let Compose scope the name to the project.
+    restart: unless-stopped
+    ports:
+      # Container-side port only is intentional. On Coolify, routing/host
+      # port assignment is managed by its own proxy (Traefik) based on the
+      # Dockerfile's EXPOSE — a hardcoded host-side mapping like "3000:3000"
+      # risks colliding with other apps on the same VPS. For fully standalone
+      # `docker compose up` use outside Coolify, uncomment the host mapping
+      # below.
+      - "3000"
+      # - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # Comma-separated list of allowed origins for CORS + WS handshake checks.
+      # REQUIRED in production — replace with your real domain(s).
+      ALLOWED_ORIGINS: "https://galaxyswarm.example.com"
+      # Optional: extend the profanity blocklist, comma-separated.
+      # PROFANITY_EXTRA: "word1,word2"
+    healthcheck:
+      # Mirrors Dockerfile's HEALTHCHECK exactly, including reading PORT from
+      # the environment rather than hardcoding 3000, so this stays correct
+      # if PORT is ever overridden via the environment: block above.
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:'+(process.env.PORT||3000)+'/healthz', r => process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true

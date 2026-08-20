@@ -1,0 +1,23 @@
+{
+  "name": "galaxy-swarm",
+  "version": "1.0.0",
+  "description": "Galaxy Swarm - multiplayer .io space game",
+  "main": "src/server/index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/server/index.js",
+    "dev": "node --watch src/server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "ws": "^8.17.1",
+    "express-rate-limit": "^7.3.1",
+    "compression": "^1.7.4"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

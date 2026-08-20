@@ -1,0 +1,396 @@
+:root {
+  --void-black: #05060d;
+  --deep-navy: #0b1023;
+  --panel: #10152c;
+  --panel-border: #232a4d;
+  --core-cyan: #5fd3ff;
+  --core-cyan-bright: #bff3ff;
+  --nebula-violet: #9c6bff;
+  --star-white: #f4f6ff;
+  --dim-text: #8b92b8;
+  --danger: #ff5f7a;
+  --font-display: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--void-black);
+  color: var(--star-white);
+  font-family: var(--font-display);
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Kills native scroll/pinch/pull-to-refresh/bounce gestures across the
+     whole app — the canvas is the entire viewport, so there's never a
+     legitimate reason for the browser to intercept a touch gesture here. */
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-touch-callout: none;
+}
+
+#gameCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  background: radial-gradient(ellipse at 50% 40%, var(--deep-navy) 0%, var(--void-black) 70%);
+}
+
+.hidden { display: none !important; }
+
+/* ============ MENU OVERLAY ============ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+}
+.overlay > * { pointer-events: auto; }
+
+.menu-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* viewBox is 400x90 (see index.html); width here just scales that box —
+   overflow:visible is a safety net, the real fix is the widened viewBox
+   plus the reduced font-size/letter-spacing below so the text never
+   exceeds its own coordinate space in the first place. */
+.logo-svg { width: 360px; max-width: 88vw; height: auto; overflow: visible; display: block; }
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 800;
+  fill: var(--star-white);
+  letter-spacing: 1px;
+  white-space: pre;
+}
+.logo-accent { fill: var(--core-cyan); }
+
+#joinForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+#nicknameInput {
+  width: 280px;
+  padding: 14px 18px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--star-white);
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+#nicknameInput:focus {
+  border-color: var(--core-cyan);
+  box-shadow: 0 0 0 3px rgba(95, 211, 255, 0.18);
+}
+
+.play-btn {
+  width: 280px;
+  padding: 14px 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--void-black);
+  background: linear-gradient(135deg, var(--core-cyan-bright), var(--core-cyan));
+  box-shadow: 0 0 24px rgba(95, 211, 255, 0.35);
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+.play-btn:hover { transform: translateY(-1px); box-shadow: 0 0 32px rgba(95, 211, 255, 0.5); }
+.play-btn:active { transform: translateY(0); }
+
+.join-error {
+  min-height: 18px;
+  color: var(--danger);
+  font-size: 13px;
+  margin: 0;
+}
+
+.return-message {
+  min-height: 18px;
+  color: var(--core-cyan-bright);
+  font-size: 13px;
+  margin: -6px 0 0;
+  text-align: center;
+  max-width: 300px;
+}
+
+/* ============ CORNER CONTROLS ============ */
+.quality-toggle {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--dim-text);
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.quality-toggle:hover { border-color: var(--core-cyan); color: var(--star-white); }
+#qualityLabel { color: var(--core-cyan); font-weight: 700; }
+
+.skin-btn {
+  position: absolute;
+  bottom: 26px;
+  left: 26px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--star-white);
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.skin-btn:hover { border-color: var(--nebula-violet); }
+.skin-preview {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--core-cyan-bright), var(--core-cyan) 60%, #1b6fe0);
+  display: inline-block;
+}
+
+.server-btn {
+  position: absolute;
+  bottom: 26px;
+  right: 26px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--star-white);
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.server-btn:hover { border-color: var(--nebula-violet); }
+
+.menu-footer {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--dim-text);
+}
+.footer-link {
+  background: none; border: none; color: var(--dim-text);
+  font-size: 12px; cursor: pointer; padding: 4px;
+}
+.footer-link:hover { color: var(--core-cyan); }
+.footer-dot { opacity: 0.5; }
+
+/* ============ MODALS ============ */
+.modal {
+  position: fixed; inset: 0; z-index: 30;
+  background: rgba(2, 3, 8, 0.72);
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 28px 32px;
+  min-width: 320px;
+  max-width: 90vw;
+  text-align: center;
+}
+.modal-panel h2 { margin: 0 0 18px; font-size: 18px; letter-spacing: 0.5px; }
+
+.skin-carousel { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.skin-option {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  background: var(--deep-navy); border: 1px solid var(--panel-border);
+  border-radius: 10px; padding: 14px 16px; color: var(--star-white);
+  font-size: 12px; cursor: pointer; width: 90px;
+}
+.skin-option.active, .skin-option:hover { border-color: var(--core-cyan); }
+.skin-dot { width: 34px; height: 34px; border-radius: 50%; }
+.skin-planet { background: radial-gradient(circle at 35% 30%, #bff3ff, #5fd3ff 60%, #1b6fe0); }
+.skin-nebula { background: radial-gradient(circle at 35% 30%, #e2bfff, #9c6bff 60%, #5327a8); }
+.skin-blackhole { background: radial-gradient(circle at 50% 50%, #000 40%, #3a1a5c 100%); box-shadow: 0 0 14px 2px rgba(156,107,255,0.6); }
+.skin-starcore { background: radial-gradient(circle at 35% 30%, #fff6d1, #ffcf5f 60%, #ff8a3d); }
+
+.server-list { display: flex; flex-direction: column; gap: 10px; }
+.server-option {
+  background: var(--deep-navy); border: 1px solid var(--panel-border);
+  border-radius: 8px; padding: 12px 20px; color: var(--star-white);
+  font-size: 14px; cursor: pointer;
+}
+.server-option.active, .server-option:hover { border-color: var(--core-cyan); }
+
+.modal-close {
+  margin-top: 20px;
+  background: var(--core-cyan); color: var(--void-black);
+  border: none; border-radius: 8px; padding: 10px 24px;
+  font-weight: 700; cursor: pointer;
+}
+.modal-panel-legal { width: min(720px, 92vw); height: 80vh; padding: 12px; position: relative; }
+.modal-close-abs { position: absolute; top: 10px; right: 10px; padding: 6px 10px; margin: 0; background: var(--panel); color: var(--star-white); border: 1px solid var(--panel-border); }
+#legalFrame { width: 100%; height: 100%; border: none; border-radius: 8px; background: var(--star-white); }
+
+/* ============ HUD ============ */
+.hud {
+  position: fixed; inset: 0; pointer-events: none; z-index: 5;
+}
+
+.leaderboard-wrap {
+  position: absolute;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  left: calc(24px + env(safe-area-inset-left, 0px));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.leaderboard-toggle {
+  display: none; /* only shown at the <=768px breakpoint, see media query */
+  pointer-events: auto;
+  touch-action: manipulation;
+  background: rgba(16, 21, 44, 0.8);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  color: var(--star-white);
+  font-size: 14px;
+  line-height: 1;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.leaderboard {
+  background: rgba(16, 21, 44, 0.7);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  min-width: 170px;
+  max-width: min(240px, 60vw);
+  font-size: clamp(11px, 2.6vw, 12px);
+}
+.leaderboard h3 { margin: 0 0 8px; font-size: 12px; color: var(--core-cyan); letter-spacing: 1px; }
+.leaderboard ol { margin: 0; padding-left: 18px; }
+.leaderboard li { margin-bottom: 3px; color: var(--dim-text); overflow-wrap: anywhere; }
+.leaderboard li.me { color: var(--star-white); font-weight: 700; }
+
+/* Collapsed state: header stays visible (so the toggle chip + rank-1 context
+   is still glanceable), the full ranked list hides. Toggled by JS in
+   game.js, defaulted to collapsed under 768px on load/resize. */
+.leaderboard.collapsed ol { display: none; }
+.leaderboard.collapsed { padding-bottom: 8px; }
+
+.score-display {
+  position: absolute;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(16, 21, 44, 0.7);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 8px clamp(12px, 4vw, 18px);
+  font-size: clamp(12px, 3vw, 13px);
+  white-space: nowrap;
+}
+.boost-hint {
+  position: absolute;
+  /* Vertical offset is set dynamically in game.js (layoutMobileControls),
+     since it must clear the radar panel AND, on touch devices, the boost
+     button — both of which are responsive-sized, so a fixed CSS value
+     can't track them reliably across breakpoints. This is just the
+     fallback before JS runs on first paint. */
+  bottom: 200px;
+  right: calc(24px + env(safe-area-inset-right, 0px));
+  font-size: 11px; color: var(--dim-text);
+  text-align: right;
+  max-width: 44vw;
+}
+
+/* Large circular touch target, thumb-reachable in the bottom-right cluster
+   alongside the radar. Only ever shown via JS on detected touch devices
+   (see isTouchDevice in game.js) — desktop users never see it, regardless
+   of window width, since resizing a desktop window shouldn't summon a
+   touch-only control. */
+.boost-btn {
+  position: absolute;
+  /* right/bottom set dynamically by layoutMobileControls() in game.js so it
+     always sits flush next to the radar panel at any screen size. */
+  right: 24px;
+  bottom: 24px;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 2px solid rgba(191, 243, 255, 0.7);
+  background: radial-gradient(circle at 35% 30%, rgba(191,243,255,0.9), rgba(95,211,255,0.55) 60%, rgba(27,111,224,0.4));
+  color: #05060d;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 0 22px rgba(95, 211, 255, 0.35);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.boost-btn:active,
+.boost-btn.pressed {
+  transform: scale(0.92);
+  box-shadow: 0 0 32px rgba(95, 211, 255, 0.6);
+}
+
+/* ============ DEATH SCREEN ============ */
+#deathScreen h1 { font-size: 24px; margin: 0; }
+#deathReason { color: var(--dim-text); margin: 8px 0 20px; font-size: 13px; }
+
+@media (max-width: 640px) {
+  .logo-svg { width: 280px; }
+  #nicknameInput, .play-btn { width: 220px; }
+  .skin-btn, .server-btn { font-size: 11px; padding: 8px 12px; }
+  .menu-footer { font-size: 10px; }
+  .return-message { max-width: 240px; }
+}
+
+/* ============ RESPONSIVE HUD (<=768px) ============ */
+@media (max-width: 768px) {
+  /* Leaderboard becomes a collapsible chip so it never sits over the
+     player's core near screen center on narrow viewports — default
+     collapsed state is also enforced in JS on load/resize. */
+  .leaderboard-toggle { display: inline-block; }
+  .leaderboard { max-width: 50vw; padding: 10px 12px; }
+  .leaderboard h3 { margin-bottom: 4px; }
+
+  .boost-btn { width: 66px; height: 66px; font-size: 12px; }
+
+  .score-display { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+}
+
+@media (max-width: 420px) {
+  .boost-btn { width: 58px; height: 58px; font-size: 11px; }
+  .boost-hint { font-size: 10px; max-width: 50vw; }
+}

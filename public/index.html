@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Galaxy Swarm — Multiplayer Space.io Game</title>
+<meta name="description" content="Grow your celestial core, gather stardust, and destroy rival orbits in Galaxy Swarm." />
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- ============ MENU OVERLAY ============ -->
+<div id="menuOverlay" class="overlay">
+
+  <button id="qualityToggle" class="quality-toggle" type="button" aria-label="Toggle graphics quality">
+    <span id="qualityLabel">HIGH</span> QUALITY
+  </button>
+
+  <div class="menu-center">
+    <div class="logo" aria-hidden="true">
+      <!-- viewBox widened (320->400) and text repositioned/resized so "GALAXY SWARM"
+           no longer clips against the right edge at any viewport width; the SVG
+           scales as one unit so this is the actual fix, not just a CSS width tweak. -->
+      <svg viewBox="0 0 400 90" class="logo-svg">
+        <defs>
+          <radialGradient id="coreGrad" cx="50%" cy="45%" r="65%">
+            <stop offset="0%" stop-color="#bff3ff"/>
+            <stop offset="45%" stop-color="#5fd3ff"/>
+            <stop offset="100%" stop-color="#1b6fe0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="32" cy="45" r="16" fill="url(#coreGrad)"/>
+        <ellipse cx="32" cy="45" rx="30" ry="10" fill="none" stroke="#5fd3ff" stroke-width="1.5" opacity="0.55"/>
+        <text x="74" y="57" class="logo-text">GALAXY <tspan class="logo-accent">SWARM</tspan></text>
+      </svg>
+    </div>
+
+    <p id="returnMessage" class="return-message hidden"></p>
+
+    <form id="joinForm" autocomplete="off">
+      <input
+        id="nicknameInput"
+        type="text"
+        maxlength="15"
+        placeholder="Enter nickname"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button id="playBtn" type="submit" class="play-btn">PLAY</button>
+    </form>
+    <p id="joinError" class="join-error" role="alert" aria-live="polite"></p>
+  </div>
+
+  <button id="skinBtn" class="skin-btn" type="button">
+    <span class="skin-preview" id="skinPreview"></span>
+    Change Skin
+  </button>
+
+  <button id="serverBtn" class="server-btn" type="button">
+    <span id="serverLabel">EU-West</span> ▾
+  </button>
+
+  <footer class="menu-footer">
+    <button class="footer-link" data-legal="privacy" type="button">Privacy Policy</button>
+    <span class="footer-dot">•</span>
+    <button class="footer-link" data-legal="terms" type="button">Terms of Service</button>
+    <span class="footer-dot">•</span>
+    <button class="footer-link" data-legal="contact" type="button">Contact</button>
+  </footer>
+</div>
+
+<!-- ============ SKIN CAROUSEL MODAL ============ -->
+<div id="skinModal" class="modal hidden">
+  <div class="modal-panel">
+    <h2>Choose Your Core</h2>
+    <div class="skin-carousel" id="skinCarousel">
+      <button class="skin-option" data-skin="planet"><span class="skin-dot skin-planet"></span>Planet</button>
+      <button class="skin-option" data-skin="nebula"><span class="skin-dot skin-nebula"></span>Nebula</button>
+      <button class="skin-option" data-skin="blackhole"><span class="skin-dot skin-blackhole"></span>Black Hole</button>
+      <button class="skin-option" data-skin="starcore"><span class="skin-dot skin-starcore"></span>Star Core</button>
+    </div>
+    <button class="modal-close" type="button" data-close-modal>Done</button>
+  </div>
+</div>
+
+<!-- ============ SERVER SELECT MODAL ============ -->
+<div id="serverModal" class="modal hidden">
+  <div class="modal-panel">
+    <h2>Choose Server</h2>
+    <div class="server-list" id="serverList">
+      <button class="server-option" data-server="eu-west">EU-West</button>
+      <button class="server-option" data-server="us-east">US-East</button>
+      <button class="server-option" data-server="asia">Asia-Pacific</button>
+    </div>
+    <button class="modal-close" type="button" data-close-modal>Done</button>
+  </div>
+</div>
+
+<!-- ============ LEGAL MODAL (loads static pages via iframe) ============ -->
+<div id="legalModal" class="modal hidden">
+  <div class="modal-panel modal-panel-legal">
+    <button class="modal-close modal-close-abs" type="button" data-close-modal>✕</button>
+    <iframe id="legalFrame" title="Legal document" src="about:blank"></iframe>
+  </div>
+</div>
+
+<!-- ============ IN-GAME HUD ============ -->
+<div id="hud" class="hud hidden">
+  <div class="leaderboard-wrap">
+    <button id="leaderboardToggle" class="leaderboard-toggle" type="button" aria-label="Toggle leaderboard" aria-expanded="true">🏆</button>
+    <div id="leaderboard" class="leaderboard"></div>
+  </div>
+  <div id="scoreDisplay" class="score-display">Mass: 0</div>
+  <div id="boostHint" class="boost-hint">Hold SPACE or click to boost</div>
+  <button id="boostBtn" class="boost-btn hidden" type="button" aria-label="Boost">BOOST</button>
+</div>
+
+<!-- ============ DEATH SCREEN ============ -->
+<div id="deathScreen" class="overlay hidden">
+  <div class="menu-center">
+    <h1 id="deathTitle">You were destroyed</h1>
+    <p id="deathReason"></p>
+    <button id="respawnBtn" class="play-btn" type="button">PLAY AGAIN</button>
+  </div>
+</div>
+
+<script src="/js/ui.js" defer></script>
+<script src="/js/game.js" defer></script>
+</body>
+</html>
